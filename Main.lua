@@ -184,12 +184,6 @@ local function CreateTable(parent, texts, widths, justfiesH, rightPadding)
 end
 
 local main = CreateFrame("Frame", "AchLeaderboard", UIParent, "BasicFrameTemplateWithInset");
-local guildName, _, _, _ = GetGuildInfo("player")
-local title = "Achievement Leaderboard" .. " - " .. guildName
-
-if string.len(title) > 50 then
-    title = string.sub(title, 0, 50) .. "..."
-end
 
 main:EnableMouse(true)
 main:SetMovable(true)
@@ -204,7 +198,7 @@ main:SetSize(384, 512)
 main:SetPoint("TOPLEFT", nil, "TOPLEFT")
 main.title = main:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 main.title:SetPoint("CENTER", main.TitleBg, "CENTER", 5, 0)
-main.title:SetText(title)
+main.title:SetText("Achievement Leaderboard")
 
 local scrollFrame = CreateFrame("ScrollFrame", nil, main, "UIPanelScrollFrameTemplate")
 scrollFrame:SetPoint("TOPLEFT", 3, -54)
@@ -243,6 +237,8 @@ local function UpdateCellsForRow(data, row)
         if i == 1 then
             if (data[i] == PLAYER_NAME_INC_GUILD) then
                 row:LockHighlight()
+            else
+                row:UnlockHighlight()
             end
 
             row.cells[1]:SetText(Ambiguate(data[i], "short"))
@@ -270,11 +266,7 @@ local function LoopRowsToFill()
             end
         end
 
-        local data = {
-            sortedValues[index], 
-            cache[sortedValues[index]].points,
-            rank
-        }
+        local data = {sortedValues[index], cache[sortedValues[index]].points, rank}
         local row = rowFrame.rows[index];
 
         if (row:IsShown()) then
@@ -285,7 +277,7 @@ end
 
 local function UpdateRows()
     ProcessGuildData()
-    
+
     local prevRows = TableLength(rowFrame.rows)
     local newRows = TableLength(cache)
 
@@ -345,6 +337,14 @@ main:RegisterEvent("PLAYER_ENTERING_WORLD")
 main:RegisterEvent("ACHIEVEMENT_EARNED")
 
 main:SetScript("OnEvent", function()
+    local guildName, _, _, _ = GetGuildInfo("player")
+    local title = "Achievement Leaderboard" .. " - " .. guildName
+
+    if string.len(title) > 50 then
+        title = string.sub(title, 0, 50) .. "..."
+    end
+    
+    main.title:SetText(title)
     ProcessGuildData()
 end)
 
