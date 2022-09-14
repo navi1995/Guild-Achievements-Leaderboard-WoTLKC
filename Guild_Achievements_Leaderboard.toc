@@ -1,0 +1,7 @@
+## Interface: 30400
+## Title: Guild Achievements Leaderboard
+## Notes: Compare your achievement score to your guilds
+## Author: Navi
+## Version: 1.0.0
+
+Main.lua
