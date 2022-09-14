@@ -195,7 +195,7 @@ main:SetScript("OnMouseUp", function(self)
 end)
 
 main:SetSize(384, 512)
-main:SetPoint("TOPLEFT", nil, "TOPLEFT")
+main:SetPoint("CENTER", nil, "CENTER")
 main.title = main:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 main.title:SetPoint("CENTER", main.TitleBg, "CENTER", 5, 0)
 main.title:SetText("Achievement Leaderboard")
