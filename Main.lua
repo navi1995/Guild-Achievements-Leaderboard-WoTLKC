@@ -1,12 +1,12 @@
 local cache = {};
-local achString = "ACH:[0-9]+";
+local ACH_REGEX = "ACH:[0-9]+";
 local BUTTON_TEXT_PADDING = 15
 local BUTTON_HEIGHT = 22
 local EDITBOX_HEIGHT = 24
 local ROW_TEXT_PADDING = 5
-local fontHeight = select(2, GameFontNormal:GetFont())
-local playerName = GetUnitName("player")
-local playerNameWithGuild = playerName .. "-" .. GetRealmName();
+local FONT_HEIGHT = select(2, GameFontNormal:GetFont())
+local PLAYER_NAME = GetUnitName("player")
+local PLAYER_NAME_INC_GUILD = PLAYER_NAME .. "-" .. GetRealmName();
 
 local function TableLength(t)
     local z = 0
@@ -16,7 +16,7 @@ local function TableLength(t)
     return z
 end
 
-local function getKeysSortedByValue(tbl, sortFunction)
+local function GetKeysSortedByValue(tbl, sortFunction)
     local keys = {}
     for key in pairs(tbl) do
         table.insert(keys, key)
@@ -34,8 +34,9 @@ local function StripString(s)
 end
 
 local function UpdatePublicNote(note, guildIndex, achievementPoints)
-    local noteWithoutAchievements = StripString(string.gsub(note, achString, ""));
+    local noteWithoutAchievements = StripString(string.gsub(note, ACH_REGEX, ""));
     local newNote = noteWithoutAchievements .. " ACH:" .. achievementPoints
+
     GuildRosterSetPublicNote(guildIndex, newNote);
 
     if (string.len(newNote) > 31) then
@@ -45,9 +46,9 @@ local function UpdatePublicNote(note, guildIndex, achievementPoints)
 end
 
 local function GetAchievementPointsFromNote(note)
-    local startIndex, endIndex = string.find(note, achString);
-    local extractedAchString = string.sub(note, startIndex, endIndex);
-    local achievementPoints = string.gsub(extractedAchString, "ACH:", "");
+    local startIndex, endIndex = string.find(note, ACH_REGEX);
+    local extractedACH_REGEX = string.sub(note, startIndex, endIndex);
+    local achievementPoints = string.gsub(extractedACH_REGEX, "ACH:", "");
 
     return tonumber(achievementPoints)
 end
@@ -67,15 +68,15 @@ local function ProcessGuildData()
     end
 
     local num = GetNumGuildMembers();
-    local cn = playerNameWithGuild;
 
     for i = 1, num do
         local name, rank, _, _, _, _, pubNote, _, _, _, class, _, _, _, _, _, guid = GetGuildRosterInfo(i);
-        if cn == name then
+
+        if PLAYER_NAME_INC_GUILD == name then
             -- You
             SetAchievementPointsInCache(name, GetTotalAchievementPoints(), class);
             UpdatePublicNote(pubNote, i, GetTotalAchievementPoints());
-        elseif string.find(pubNote, achString) ~= nil then
+        elseif string.find(pubNote, ACH_REGEX) ~= nil then
             -- Others
             SetAchievementPointsInCache(name, GetAchievementPointsFromNote(pubNote), class);
         end
@@ -92,6 +93,7 @@ local function CreateTableRow(parent, rowHeight, texts, widths, justifiesH)
     row:SetPoint("RIGHT")
 
     row.cells = {}
+
     for i, w in ipairs(widths) do
         local c = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 
@@ -105,8 +107,8 @@ local function CreateTableRow(parent, rowHeight, texts, widths, justifiesH)
             c:SetPoint("LEFT", row.cells[#row.cells], "RIGHT", 2 * ROW_TEXT_PADDING, 0)
         end
 
-        table.insert(row.cells, c)
         c:SetText(w)
+        table.insert(row.cells, c)
     end
 
     return row
@@ -127,6 +129,7 @@ local function CreateTable(parent, texts, widths, justfiesH, rightPadding)
     end
 
     local remainingWidthSpace = parent:GetWidth() - totalFixedWidths
+
     assert(remainingWidthSpace >= 0, "Widths specified exceed parent width")
 
     local dynamicWidth = math.floor(remainingWidthSpace / numDynamicWidths)
@@ -154,12 +157,14 @@ local function CreateTable(parent, texts, widths, justfiesH, rightPadding)
     -- Compute number of rows
     local fontHeight = select(2, GameFontNormalSmall:GetFont())
     local rowHeight = fontHeight + 4
+
     rowFrame.rowHeight = rowHeight
     rowFrame.texts = texts
     rowFrame.widths = widths
     rowFrame.justfiesH = justfiesH
+
     local numRows = TableLength(cache)
-    local sortedKeys = getKeysSortedByValue(cache, function(a, b)
+    local sortedKeys = GetKeysSortedByValue(cache, function(a, b)
         return a.points > b.points
     end)
 
@@ -178,7 +183,7 @@ local function CreateTable(parent, texts, widths, justfiesH, rightPadding)
     end
 end
 
-local main = CreateFrame("Frame", "AchLeaderboard", UIParent, "BasicFrameTemplateWithInset"); -- "BasicFrameTemplateWithInset")
+local main = CreateFrame("Frame", "AchLeaderboard", UIParent, "BasicFrameTemplateWithInset");
 local guildName, _, _, _ = GetGuildInfo("player")
 local title = "Achievement Leaderboard" .. " - " .. guildName
 
@@ -227,7 +232,6 @@ CreateTable(scrollChild, {"Name", "Points", "Rank"}, {0, 100, 100}, {"LEFT", "CE
 
 local rowFrame = scrollChild.rowFrame
 rowFrame:SetPoint("TOP", 0, -24)
-rowFrame.needUpdate = true
 main:Hide()
 
 local function UpdateCellsForRow(data, row)
@@ -237,7 +241,7 @@ local function UpdateCellsForRow(data, row)
         c:SetText(data[i])
 
         if i == 1 then
-            if (data[i] == playerNameWithGuild) then
+            if (data[i] == PLAYER_NAME_INC_GUILD) then
                 row:LockHighlight()
             end
 
@@ -253,7 +257,7 @@ local function UpdateCellsForRow(data, row)
 end
 
 local function LoopRowsToFill()
-    local sortedValues = getKeysSortedByValue(cache, function(a, b)
+    local sortedValues = GetKeysSortedByValue(cache, function(a, b)
         return a.points > b.points
     end)
 
@@ -281,6 +285,7 @@ end
 
 local function UpdateRows()
     ProcessGuildData()
+    
     local prevRows = TableLength(rowFrame.rows)
     local newRows = TableLength(cache)
 
