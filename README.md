@@ -8,4 +8,10 @@ It then reads these when displaying the leaderboard.
 
 Commands are currently 
 
-/gach and /leaderboard
+```
+/gach
+```
+and 
+```
+/leaderboard
+```
