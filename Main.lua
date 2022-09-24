@@ -338,13 +338,19 @@ main:RegisterEvent("ACHIEVEMENT_EARNED")
 
 main:SetScript("OnEvent", function()
     local guildName, _, _, _ = GetGuildInfo("player")
-    local title = "Achievement Leaderboard" .. " - " .. guildName
 
-    if string.len(title) > 50 then
-        title = string.sub(title, 0, 50) .. "..."
+    if guildName ~= nil then
+        local title = "Achievement Leaderboard" .. " - " .. guildName
+
+        if string.len(title) > 50 then
+            title = string.sub(title, 0, 50) .. "..."
+        end
+        
+        main.title:SetText(title)
+    else 
+        main.title:SetText("Achievement Leaderboard")
     end
     
-    main.title:SetText(title)
     ProcessGuildData()
 end)
 
