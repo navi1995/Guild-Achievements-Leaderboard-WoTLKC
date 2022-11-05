@@ -2,6 +2,6 @@
 ## Title: Guild Achievements Leaderboard
 ## Notes: Compare your achievement score to your guilds
 ## Author: Navi
-## Version: 1.0.4
+## Version: 1.0.5
 
 Main.lua

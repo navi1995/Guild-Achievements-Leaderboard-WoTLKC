@@ -316,27 +316,7 @@ local function UpdateRows()
     end
 end
 
-local function ToggleView()
-    if not IsInGuild() then
-        return
-    end
-
-    if (main:IsShown()) then
-        main:Hide()
-    else
-        UpdateRows()
-        main:Show()
-    end
-end
-
-SLASH_GACH1 = "/gach"
-SLASH_GACH2 = "/leaderboard"
-SlashCmdList["GACH"] = ToggleView;
-
-main:RegisterEvent("PLAYER_ENTERING_WORLD")
-main:RegisterEvent("ACHIEVEMENT_EARNED")
-
-main:SetScript("OnEvent", function()
+local function UpdateTitle() 
     local guildName, _, _, _ = GetGuildInfo("player")
 
     if guildName ~= nil then
@@ -350,7 +330,31 @@ main:SetScript("OnEvent", function()
     else 
         main.title:SetText("Achievement Leaderboard")
     end
-    
+end
+
+local function ToggleView()
+    if not IsInGuild() then
+        return
+    end
+
+    if (main:IsShown()) then
+        main:Hide()
+    else
+        UpdateRows()
+        UpdateTitle()
+        main:Show()
+    end
+end
+
+SLASH_GACH1 = "/gach"
+SLASH_GACH2 = "/leaderboard"
+SlashCmdList["GACH"] = ToggleView;
+
+main:RegisterEvent("PLAYER_ENTERING_WORLD")
+main:RegisterEvent("ACHIEVEMENT_EARNED")
+
+main:SetScript("OnEvent", function()
+    UpdateTitle()    
     ProcessGuildData()
 end)
 
